@@ -103,7 +103,12 @@ domain/DNS (Workers can't run this app). Render prep needed: CAREDESK_KEY env fr
   (RENDER=true, temp schema in Supabase, dropped afterwards): no key → refuses; key → starts, __Host- Secure cookie, HSTS,
   visitor IP from XFF; wrong key → refuses with message. Local embedded Postgres no longer starts on this PC
   (initdb exit 0xC0000135 DLL not found), so that test used a throwaway Supabase schema.
-- Next: Git is NOT installed (asked owner for permission to install via winget); owner creates GitHub account + empty
+- **Done 2026-10-13:** Git for Windows 2.55 installed (winget, owner approved; `C:\Program Files\Git\cmd\git.exe`, not on
+  PATH in older shells). The project folder is now a git repo (branch `main`), pushed to the PRIVATE repo
+  **https://github.com/hudaidjaffer/caredesk** (75 files, secrets verified absent). GitHub sign-in is stored in Windows
+  Credential Manager, so Claude can push updates. Claude's shell has GCM_INTERACTIVE=never / GIT_TERMINAL_PROMPT=0; to
+  let the owner sign in, open a visible .bat window that clears those variables first.
+- Was next: Git was NOT installed (asked owner for permission to install via winget); owner creates GitHub account + empty
   private repo, Claude commits/pushes (owner signs in to GitHub in the browser popup); owner creates Render account
   (sign in with GitHub) → New → Blueprint → pastes the 3 secrets. After going live, the owner should run only the owner
   panel on the PC (not the clinic app), and add SUPABASE_SECRET_KEY to the PC .env too.
