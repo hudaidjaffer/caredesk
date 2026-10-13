@@ -1,0 +1,6 @@
+# secrets and local data: never commit these
+.env
+data/
+node_modules/
+dist/
+*.crt

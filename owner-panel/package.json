@@ -1,0 +1,14 @@
+{
+  "name": "caredesk-owner-panel",
+  "version": "1.0.0",
+  "description": "Private owner panel for approving and restricting CareDesk clinic accounts",
+  "private": true,
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "create-admin": "node server.js create-admin"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "caredesk-clinic",
+  "version": "1.0.0",
+  "description": "Practice management for dental, therapy and small medical clinics",
+  "private": true,
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "exceljs": "4.4.0",
+    "nodemailer": "10.0.14",
+    "pg": "8.23.1",
+    "qrcode": "1.5.4"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
+  }
+}

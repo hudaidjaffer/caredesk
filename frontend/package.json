@@ -1,0 +1,24 @@
+{
+  "name": "caredesk-frontend",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "React interface for the CareDesk clinic app and owner panel",
+  "scripts": {
+    "build": "vite build --config vite.clinic.config.js && vite build --config vite.owner.config.js",
+    "build:clinic": "vite build --config vite.clinic.config.js",
+    "build:owner": "vite build --config vite.owner.config.js",
+    "dev:clinic": "vite --config vite.clinic.config.js",
+    "dev:owner": "vite --config vite.owner.config.js"
+  },
+  "dependencies": {
+    "lucide-react": "1.50.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "recharts": "3.10.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "6.1.1",
+    "vite": "8.3.2"
+  }
+}

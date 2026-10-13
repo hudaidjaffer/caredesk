@@ -1,0 +1,27 @@
+# ---- secrets and local data: NEVER upload these
+.env
+*.env
+!.env.example
+**/data/
+secret.key
+*.key
+*.backup
+*.db
+*.crt
+*.pem
+
+# ---- generated
+node_modules/
+dist/
+
+# ---- the old ERPClaw project that shares this folder (not part of CareDesk)
+.github/
+assets/
+bin/
+mcp/
+scripts/
+SKILL.md
+UI.yaml
+CHANGELOG.md
+README.md
+LICENSE.txt

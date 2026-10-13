@@ -1,0 +1,28 @@
+# Render "Blueprint": tells Render how to run the CareDesk clinic app.
+# Only the clinic app goes online. The owner panel stays on the owner's PC (same Supabase database).
+# Secrets (sync: false) are typed into Render's dashboard by the owner, never stored in this file.
+services:
+  - type: web
+    name: caredesk
+    runtime: node
+    region: singapore              # same region as the Supabase project (ap-southeast-1)
+    plan: free                     # change to "starter" (or in the dashboard) so the app never sleeps
+    buildCommand: cd frontend && npm ci --include=dev && npm run build:clinic && cd ../clinic-app && npm ci --omit=dev
+    startCommand: cd clinic-app && node server.js
+    healthCheckPath: /api/public-settings
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: SECURE_COOKIES        # HTTPS-only, __Host- cookies
+        value: "1"
+      - key: TRUST_PROXY           # real visitor IPs from Render's proxy (per-person sign-in limits)
+        value: all
+      - key: SUPABASE_URL
+        value: https://aqmzbhgrciqojbkrwcxo.supabase.co
+      - key: DATABASE_URL          # Supabase session pooler string, with the database password filled in
+        sync: false
+      - key: SUPABASE_SECRET_KEY   # sb_secret_... (photos/documents/backups go to Supabase Storage)
+        sync: false
+      - key: CAREDESK_KEY          # contents of clinic-app/data/secret.key on the owner's PC
+        sync: false
