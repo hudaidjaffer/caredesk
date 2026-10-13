@@ -113,6 +113,16 @@ domain/DNS (Workers can't run this app). Render prep needed: CAREDESK_KEY env fr
   3 secrets are set correctly. Verified from outside: page loads, HSTS/CSP/X-Frame on, 8-char rule and real-email check work,
   /api/me 401 when signed out. autoDeploy is on: every `git push` to main redeploys. Free plan sleeps after 15 min idle →
   owner told to upgrade to Starter before real trials. Owner should now run ONLY the owner panel on the PC.
+- **Owner panel ONLINE 2026-10-14: https://caredesk-owner.onrender.com** (owner asked to move it to the cloud).
+  Second Render service `caredesk-owner` in render.yaml (secrets via `fromService` from `caredesk`, OWNER_PUBLIC=1).
+  Online mode (`ONLINE` in owner-panel/server.js = RENDER or OWNER_PUBLIC=1): binds 0.0.0.0 on Render's PORT; sign-in
+  REQUIRES 2FA (password-only → 403 "requires two-step sign-in"); 2FA can't be disabled online; `/api/admin/encryption-key`
+  → 403 (key only viewable in the PC owner panel); backups listed/downloaded via `backup.listAllBackups()` /
+  `readBackupBuffer()` from Supabase Storage (`storage.list()`), Storage keeps newest 30 (`pruneRemote`). First-run
+  setup stays impossible from the internet. Tested: scratchpad `test-owner-online.js` 24/24 (throwaway schema + mock
+  Storage). The PC copy still works (local mode) and is needed for: viewing/saving the encryption key, CLI commands
+  (create-admin, reset-admin-2fa, restore-backup). Supabase secret key is NOT in the PC .env (photos/backups in Storage
+  aren't reachable from the PC panel).
 - Was next: Git was NOT installed (asked owner for permission to install via winget); owner creates GitHub account + empty
   private repo, Claude commits/pushes (owner signs in to GitHub in the browser popup); owner creates Render account
   (sign in with GitHub) → New → Blueprint → pastes the 3 secrets. After going live, the owner should run only the owner
