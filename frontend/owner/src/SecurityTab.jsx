@@ -47,7 +47,7 @@ export default function SecurityTab({ me, reload }) {
       <div className="halves">
         <div className="stack" style={{ gap: 20 }}>
           <TwoFactorCard base="/api/admin/account" enabled={me.admin.totp_enabled} recoveryLeft={me.admin.recovery_codes_left} productName={`${me.settings.product_name} Owner`}
-            onChange={reload} recommendText="Strongly recommended for the owner account: it controls every clinic's access and the encryption key." />
+            onChange={reload} canDisable={!me.online} recommendText="Strongly recommended for the owner account: it controls every clinic's access and the encryption key." />
           <form className="card" onSubmit={async (e) => {
             e.preventDefault();
             try { await api('/api/admin/password', { method: 'PUT', body: pw }); setPw({ current: '', password: '' }); toast('Owner password changed'); } catch (err) { toast(err.message, true); }
@@ -70,9 +70,14 @@ export default function SecurityTab({ me, reload }) {
               }}>{busy ? 'Backing up…' : 'Back up now'}</button></div>
             <div className="card-body small muted stack" style={{ paddingBottom: 0, gap: 6 }}>
               <div><b>Database:</b> Supabase (schema <code>{me.schema}</code>) · <b>Photos &amp; files:</b> {me.storage}</div>
-              <div>A full encrypted copy of the database is made automatically every day (last 14 kept) in <code>{me.data_dir}\backups</code>
-                {/Supabase/.test(me.storage) ? ' and in your private Supabase Storage bucket' : ''}. Last backup: {me.last_backup_at ? timeAgo(me.last_backup_at) : 'never'}.</div>
-              <div>To restore one: stop the clinic app, then in the owner-panel folder run <code>node server.js restore-backup &lt;file&gt; --yes</code>.</div>
+              {me.online ? (
+                <div>A full encrypted copy of the database is made automatically every day and kept in your private Supabase Storage bucket (last 30).
+                  Last backup: {me.last_backup_at ? timeAgo(me.last_backup_at) : 'never'}.</div>
+              ) : (
+                <div>A full encrypted copy of the database is made automatically every day (last 14 kept) in <code>{me.data_dir}\backups</code>
+                  {/Supabase/.test(me.storage) ? ' and in your private Supabase Storage bucket' : ''}. Last backup: {me.last_backup_at ? timeAgo(me.last_backup_at) : 'never'}.</div>
+              )}
+              <div>To restore one: download it, then on your PC in the owner-panel folder run <code>node server.js restore-backup &lt;file&gt; --yes</code>.</div>
             </div>
             {backups.loading && !backups.data ? <Loading minHeight={80} /> : (
               <table className="t" style={{ marginTop: 10 }}><tbody>{(backups.data || []).map((b) => (
@@ -85,8 +90,10 @@ export default function SecurityTab({ me, reload }) {
             <div className="card-head"><h2><Lock />Encryption key</h2></div>
             <div className="card-body stack">
               <p className="small muted" style={{ margin: 0 }}>Medical details, notes, document text, uploaded photos and backups are encrypted (AES-256-GCM). The key lives in
-                <code> secret.key</code> in the data folder. <b>Save a copy offline</b>: if the server is lost, backups can't be restored without it.</p>
-              <div><button className="btn" onClick={() => open((close) => <KeyModal close={close} twoFactor={me.admin.totp_enabled} />)}><Eye /><span>Show recovery key</span></button></div>
+                <code> secret.key</code> in the data folder on your PC. <b>Save a copy offline</b>: if it is lost, backups can't be restored without it.</p>
+              {me.online
+                ? <p className="small" style={{ margin: 0 }}><Lock size={14} style={{ verticalAlign: -2 }} /> For safety, the key is never shown in the online owner panel. To view or save it, open the owner panel on your PC.</p>
+                : <div><button className="btn" onClick={() => open((close) => <KeyModal close={close} twoFactor={me.admin.totp_enabled} />)}><Eye /><span>Show recovery key</span></button></div>}
             </div>
           </div>
         </div>

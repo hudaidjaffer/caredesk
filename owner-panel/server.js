@@ -21,8 +21,11 @@ const {
   limit, str, accessFor, staticServer, SECURITY_HEADERS,
 } = core;
 
-const PORT = Number(process.env.OWNER_PORT) || 4000;
-const HOST = process.env.OWNER_HOST || '127.0.0.1';
+// ONLINE: the owner panel runs on a hosting service (Render) instead of only on the owner's PC.
+// Then two-step sign-in is required, the encryption key is never shown, and backups come from Supabase Storage.
+const ONLINE = !!process.env.RENDER || process.env.OWNER_PUBLIC === '1';
+const PORT = Number(process.env.OWNER_PORT || process.env.PORT) || 4000;
+const HOST = process.env.OWNER_HOST || (ONLINE ? '0.0.0.0' : '127.0.0.1');
 const serveStatic = staticServer(path.join(__dirname, 'dist'));
 
 const adminCount = async () => (await db.get('SELECT COUNT(*) AS n FROM admins')).n;
@@ -96,6 +99,11 @@ async function handleApi(req, res, url) {
       if (a) await ownerAudit(req, a.id, 'owner.login_failed');
       throw new HttpError(401, 'Incorrect email or password.');
     }
+    if (ONLINE && !a.totp_enabled) {
+      // online, a password alone never opens the owner panel
+      await ownerAudit(req, a.id, 'owner.login_blocked', { detail: 'online sign-in needs two-step sign-in' });
+      throw new HttpError(403, 'The online owner panel requires two-step sign-in. Turn it on in the owner panel on your PC (Security & backups), then sign in here.');
+    }
     if (a.totp_enabled) return send(res, 200, { mfa_required: true }, { 'Set-Cookie': await createSession('admin_mfa', a.id, req) });
     await sec.clearFailures('admins', a.id);
     await ownerAudit(req, a.id, 'owner.login');
@@ -134,7 +142,7 @@ async function handleApi(req, res, url) {
     return send(res, 200, {
       admin: { id: admin.id, email: admin.email, totp_enabled: !!admin.totp_enabled, recovery_codes_left: JSON.parse(admin.recovery_codes || '[]').length },
       settings: publicSettings(settings), trial_days: TRIAL_DAYS, last_backup_at: settings.last_backup_at || null,
-      data_dir: DATA_DIR, storage: storage.describe(), schema: SCHEMA,
+      data_dir: DATA_DIR, storage: storage.describe(), schema: SCHEMA, online: ONLINE,
     });
   }
 
@@ -281,6 +289,7 @@ async function handleApi(req, res, url) {
     return send(res, 200, { recovery_codes: codes });
   }
   if (p === '/api/admin/account/2fa/disable' && m === 'POST') {
+    if (ONLINE) throw new HttpError(403, 'Two-step sign-in cannot be turned off in the online owner panel. Use the owner panel on your PC.');
     await tf.requirePasswordAndCode('admins', admin, body);
     await tf.disableTwoFactor('admins', admin.id);
     await ownerAudit(req, admin.id, 'owner.2fa_disabled');
@@ -307,19 +316,21 @@ async function handleApi(req, res, url) {
   }
 
   // ---- backups & encryption key
-  if (p === '/api/admin/backups' && m === 'GET') return send(res, 200, backup.listBackups());
+  if (p === '/api/admin/backups' && m === 'GET') return send(res, 200, await backup.listAllBackups());
   if (p === '/api/admin/backups' && m === 'POST') {
     const file = await backup.createBackup();
     await ownerAudit(req, admin.id, 'owner.backup_created', { detail: file });
     return send(res, 201, { file });
   }
   if ((mm = p.match(/^\/api\/admin\/backups\/([\w.-]+)$/)) && m === 'GET') {
-    const file = backup.backupPath(mm[1]);
-    if (!file) throw new HttpError(404, 'Backup not found.');
+    const buf = await backup.readBackupBuffer(mm[1]);
+    if (!buf) throw new HttpError(404, 'Backup not found.');
     await ownerAudit(req, admin.id, 'owner.backup_downloaded', { detail: mm[1] });
-    return send(res, 200, fs.readFileSync(file), { 'Content-Type': 'application/octet-stream', 'Content-Disposition': `attachment; filename="${mm[1]}"` });
+    return send(res, 200, buf, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': `attachment; filename="${mm[1]}"` });
   }
   if (p === '/api/admin/encryption-key' && m === 'POST') {
+    // the master key never leaves the server over the internet; view it in the owner panel on the PC
+    if (ONLINE) throw new HttpError(403, 'For safety, the encryption key is only shown in the owner panel on your PC.');
     await tf.requirePasswordAndCode('admins', admin, body);
     await ownerAudit(req, admin.id, 'owner.encryption_key_viewed');
     return send(res, 200, { key: fs.existsSync(sec.KEY_FILE) ? fs.readFileSync(sec.KEY_FILE, 'utf8').trim() : '(set by the CAREDESK_KEY environment variable)', file: sec.KEY_FILE });

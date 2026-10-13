@@ -96,7 +96,7 @@ function PasswordCodeModal({ title, intro, base, path, close, onDone, submitLabe
 }
 
 // Card shown in Settings. base = '/api/account' (clinic) or '/api/admin/account' (owner).
-export function TwoFactorCard({ base, enabled, recoveryLeft, productName, onChange, recommendText }) {
+export function TwoFactorCard({ base, enabled, recoveryLeft, productName, onChange, recommendText, canDisable = true }) {
   const open = useModal();
   return (
     <div className="card">
@@ -112,9 +112,9 @@ export function TwoFactorCard({ base, enabled, recoveryLeft, productName, onChan
               <button className="btn sm" onClick={() => open((close) => <PasswordCodeModal title="New recovery codes" base={base} path="/2fa/recovery-codes"
                 intro="This replaces your old recovery codes with 10 new ones." submitLabel="Create new codes" close={close} onDone={onChange} productName={productName} />)}>
                 <KeyRound /><span>New recovery codes</span></button>
-              <button className="btn sm danger" onClick={() => open((close) => <PasswordCodeModal title="Turn off two-step sign-in" base={base} path="/2fa/disable"
+              {canDisable && <button className="btn sm danger" onClick={() => open((close) => <PasswordCodeModal title="Turn off two-step sign-in" base={base} path="/2fa/disable"
                 intro="Your account will be protected by your password only." submitLabel="Turn off" close={close} onDone={onChange} productName={productName} />)}>
-                <span>Turn off</span></button>
+                <span>Turn off</span></button>}
             </div>
           </>
         ) : (

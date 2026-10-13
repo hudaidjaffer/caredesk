@@ -22,6 +22,33 @@ function listBackups() {
     .sort((a, b) => b.created_at.localeCompare(a.created_at));
 }
 
+const KEEP_REMOTE = 30;
+
+// Backups on this computer plus those in the Supabase Storage bucket (online servers have no lasting disk).
+async function listAllBackups() {
+  const out = new Map(listBackups().map((b) => [b.file, b]));
+  if (storage.useSupabase) {
+    for (const o of await storage.list('backups')) {
+      if (NAME_RE.test(o.name) && !out.has(o.name)) out.set(o.name, { file: o.name, size: o.size, created_at: o.created_at });
+    }
+  }
+  return [...out.values()].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+}
+
+// The (still encrypted) backup file, from this computer or from the bucket; null if not found.
+async function readBackupBuffer(name) {
+  if (!NAME_RE.test(String(name))) return null;
+  const local = path.join(BACKUP_DIR, name);
+  if (fs.existsSync(local)) return fs.readFileSync(local);
+  return storage.useSupabase ? storage.get(`backups/${name}`) : null;
+}
+
+async function pruneRemote() {
+  const old = (await storage.list('backups')).filter((o) => NAME_RE.test(o.name))
+    .sort((a, b) => b.name.localeCompare(a.name)).slice(KEEP_REMOTE);
+  if (old.length) await storage.remove(old.map((o) => `backups/${o.name}`));
+}
+
 async function dumpAll() {
   const out = { format: 'caredesk-backup', version: 1, created_at: new Date().toISOString(), tables: {} };
   for (const t of TABLES) {
@@ -38,7 +65,7 @@ async function createBackup() {
   const sealed = encryptBuffer(zlib.gzipSync(Buffer.from(JSON.stringify(await dumpAll()))));
   fs.writeFileSync(path.join(BACKUP_DIR, name), sealed, { mode: 0o600 });
   if (storage.useSupabase) {
-    await storage.put(`backups/${name}`, sealed).catch((err) => console.error('Backup copy to Supabase Storage failed:', err.message));
+    await storage.put(`backups/${name}`, sealed).then(pruneRemote).catch((err) => console.error('Backup copy to Supabase Storage failed:', err.message));
   }
   await setSetting('last_backup_at', new Date().toISOString());
   for (const old of listBackups().slice(KEEP)) fs.rmSync(path.join(BACKUP_DIR, old.file), { force: true });
@@ -91,4 +118,4 @@ function scheduleBackups() {
   setInterval(run, 3600000).unref();
 }
 
-module.exports = { listBackups, createBackup, backupPath, readBackupFile, restoreBackup, scheduleBackups };
+module.exports = { listBackups, listAllBackups, readBackupBuffer, createBackup, backupPath, readBackupFile, restoreBackup, scheduleBackups };

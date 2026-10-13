@@ -80,4 +80,16 @@ async function remove(keys) {
   if (!res.ok && res.status !== 404) console.error('Supabase Storage delete failed:', res.status);
 }
 
-module.exports = { put, get, remove, ensureBucket, useSupabase, BUCKET, describe: () => (useSupabase ? `Supabase Storage (bucket "${BUCKET}")` : `this computer (${UPLOAD_DIR})`) };
+// Lists files in a folder of the bucket: [{ name, size, created_at }] (Supabase only; [] for local storage).
+async function list(prefix) {
+  if (!useSupabase) return [];
+  const res = await call(`${SUPABASE_URL}/storage/v1/object/list/${BUCKET}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prefix: safeKey(prefix), limit: 1000, offset: 0, sortBy: { column: 'name', order: 'desc' } }),
+  }, 'list');
+  if (!res.ok) throw new Error(`Listing Supabase Storage failed: ${res.status}`);
+  return (await res.json()).filter((o) => o.id || o.metadata)                 // folders have no id/metadata
+    .map((o) => ({ name: o.name, size: (o.metadata && o.metadata.size) || 0, created_at: o.created_at }));
+}
+
+module.exports = { put, get, remove, list, ensureBucket, useSupabase, BUCKET, describe: () => (useSupabase ? `Supabase Storage (bucket "${BUCKET}")` : `this computer (${UPLOAD_DIR})`) };
