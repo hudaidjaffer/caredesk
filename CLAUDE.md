@@ -108,6 +108,11 @@ domain/DNS (Workers can't run this app). Render prep needed: CAREDESK_KEY env fr
   **https://github.com/hudaidjaffer/caredesk** (75 files, secrets verified absent). GitHub sign-in is stored in Windows
   Credential Manager, so Claude can push updates. Claude's shell has GCM_INTERACTIVE=never / GIT_TERMINAL_PROMPT=0; to
   let the owner sign in, open a visible .bat window that clears those variables first.
+- **LIVE 2026-10-13: https://caredesk-t6nm.onrender.com** (Render Blueprint "caredesk", Free plan, Singapore;
+  `caredesk.onrender.com` belongs to someone else). Log showed DB + Supabase Storage (bucket caredesk-files) connected, so all
+  3 secrets are set correctly. Verified from outside: page loads, HSTS/CSP/X-Frame on, 8-char rule and real-email check work,
+  /api/me 401 when signed out. autoDeploy is on: every `git push` to main redeploys. Free plan sleeps after 15 min idle →
+  owner told to upgrade to Starter before real trials. Owner should now run ONLY the owner panel on the PC.
 - Was next: Git was NOT installed (asked owner for permission to install via winget); owner creates GitHub account + empty
   private repo, Claude commits/pushes (owner signs in to GitHub in the browser popup); owner creates Render account
   (sign in with GitHub) → New → Blueprint → pastes the 3 secrets. After going live, the owner should run only the owner
