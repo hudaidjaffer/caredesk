@@ -51,7 +51,13 @@ export default function Appointments() {
   if (error) return <ErrorCard error={error} onRetry={reload} />;
 
   const today = localDate();
-  const label = `${days[0].toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} – ${days[6].toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}`;
+  // Day view: one column that fits a phone screen; prev/next then move a day instead of a week
+  const dayView = c.view === 'day';
+  const shown = dayView ? [base] : days;
+  const step = dayView ? 1 : 7;
+  const label = dayView
+    ? base.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+    : `${days[0].toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} – ${days[6].toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}`;
   const move = (n) => setC({ ...c, date: n === 0 ? localDate() : localDate(new Date(base.getFullYear(), base.getMonth(), base.getDate() + n)) });
   const openAppt = (a) => openAppointment(open, toast, a.id);
   const rows = list || [];
@@ -65,22 +71,22 @@ export default function Appointments() {
       </PageHead>
       <div className="card">
         <div className="toolbar">
-          <button className="btn icon" aria-label="Previous week" onClick={() => move(-7)}><ChevronLeft /></button>
+          <button className="btn icon" aria-label={dayView ? 'Previous day' : 'Previous week'} onClick={() => move(-step)}><ChevronLeft /></button>
           <button className="btn" onClick={() => move(0)}>Today</button>
-          <button className="btn icon" aria-label="Next week" onClick={() => move(7)}><ChevronRight /></button>
+          <button className="btn icon" aria-label={dayView ? 'Next day' : 'Next week'} onClick={() => move(step)}><ChevronRight /></button>
           <h3 style={{ margin: '0 6px' }}>{label}</h3>
           <span className="spacer" />
           <select value={c.practitioner} onChange={(e) => setC({ ...c, practitioner: e.target.value })} style={{ width: 'auto' }}>
             <option value="">All practitioners</option>
             {refs.practitioners.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
-          <Seg options={[['week', 'Week'], ['list', 'List']]} value={c.view} onChange={(v) => setC({ ...c, view: v })} />
+          <Seg options={[['day', 'Day'], ['week', 'Week'], ['list', 'List']]} value={c.view} onChange={(v) => setC({ ...c, view: v })} />
         </div>
-        {loading && !list ? <Loading minHeight={300} /> : c.view === 'week' ? (
+        {loading && !list ? <Loading minHeight={300} /> : c.view !== 'list' ? (
           <div className="cal-scroll" ref={scroller}>
-            <div className="cal">
+            <div className="cal" style={dayView ? { gridTemplateColumns: '58px minmax(0, 1fr)', minWidth: 0 } : undefined}>
               <div className="cal-head" />
-              {days.map((d) => (
+              {shown.map((d) => (
                 <div key={d.toISOString()} className={`cal-head${localDate(d) === today ? ' today' : ''}`}>
                   {d.toLocaleDateString(undefined, { weekday: 'short' })}<b>{d.getDate()}</b>
                 </div>
@@ -88,7 +94,7 @@ export default function Appointments() {
               <div className="cal-times">{[...Array(H1 - H0)].map((_, i) => (
                 <div key={i}>{i ? new Date(2000, 0, 1, H0 + i).toLocaleTimeString(undefined, { hour: 'numeric' }) : ''}</div>
               ))}</div>
-              {days.map((d) => {
+              {shown.map((d) => {
                 const ds = localDate(d);
                 const evs = layoutDay(rows.filter((a) => a.starts_at.slice(0, 10) === ds).map((a) => {
                   const t = parseLocal(a.starts_at);
@@ -139,7 +145,7 @@ export default function Appointments() {
           }) : <Empty icon={CalendarDays} title="No appointments this week" />
         )}
       </div>
-      {c.view === 'week' && canWrite && <p className="small faint">Tip: click an empty slot in the calendar to book at that time.</p>}
+      {c.view !== 'list' && canWrite && <p className="small faint">Tip: click an empty slot in the calendar to book at that time.</p>}
     </>
   );
 }

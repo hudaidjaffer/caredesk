@@ -106,10 +106,10 @@ function Main({ me, reload }) {
   const s = me.settings;
   return (
     <div className="main" style={{ minHeight: '100%' }}>
-      <header className="topbar" style={{ background: 'var(--surface)', position: 'static' }}>
+      <header className="topbar owner-top" style={{ background: 'var(--surface)', position: 'static' }}>
         <Brand name={`${s.product_name} · Owner`} />
         <span className="spacer" />
-        <span className="small muted">{me.admin.email}</span>
+        <span className="small muted owner-email">{me.admin.email}</span>
         <button className="btn sm" onClick={async () => { await api('/api/admin/logout', { method: 'POST' }); window.location.reload(); }}><LogOut /><span>Sign out</span></button>
       </header>
       <nav className="owner-tabs">

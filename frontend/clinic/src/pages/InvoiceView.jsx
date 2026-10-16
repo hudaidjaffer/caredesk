@@ -43,7 +43,7 @@ export default function InvoiceView({ id }) {
           <span className="spacer" />
           <dl className="kv" style={{ gridTemplateColumns: 'auto auto' }}><dt>Invoice date</dt><dd>{fmtDate(inv.date)}</dd><dt>Due date</dt><dd>{fmtDate(inv.due_date)}</dd></dl>
         </div>
-        <div className="table-wrap"><table className="t">
+        <div className="table-wrap"><table className="t no-cards">
           <thead><tr><th>Description</th><th className="right">Qty</th><th className="right">Price</th><th className="right">Amount</th></tr></thead>
           <tbody>{inv.items.map((it, i) => (
             <tr key={i}><td>{it.description}</td><td className="right">{it.qty}</td><td className="right mono">{money(it.unit_price)}</td><td className="right mono">{money(Math.round(it.qty * it.unit_price))}</td></tr>

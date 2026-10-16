@@ -94,7 +94,7 @@ export default function AiTab({ me, reload }) {
         <div className="card">
           <div className="card-head"><h2><Sparkles />Usage this month</h2><span className="spacer" /><b>{usd(total)}</b></div>
           {clinics.loading && !clinics.data ? <Loading minHeight={100} /> : usage.length ? (
-            <table className="t"><thead><tr><th>Clinic</th><th className="right">Requests</th><th className="right">Cost</th></tr></thead>
+            <table className="t no-cards"><thead><tr><th>Clinic</th><th className="right">Requests</th><th className="right">Cost</th></tr></thead>
               <tbody>{usage.map((c) => (
                 <tr key={c.id}><td><b>{c.name}</b><div className="small muted">limit {usd(c.ai.limit_usd)}{!c.ai.enabled && ' · off'}</div></td>
                   <td className="right">{c.ai.requests}</td><td className="right mono">{usd(c.ai.used_usd)}</td></tr>

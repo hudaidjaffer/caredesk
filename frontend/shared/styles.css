@@ -380,7 +380,6 @@ input.autofilled, select.autofilled, textarea.autofilled { background: #fffbea; 
   .totals { width: 100%; }
 }
 @media (max-width: 520px) {
-  .stats { grid-template-columns: 1fr; }
   h1 { font-size: 21px; }
 }
 
@@ -481,6 +480,106 @@ button { font: inherit; }
   .chat { height: calc(100vh - 170px); }
   .owner-tabs { padding: 0 12px; }
   .codes { grid-template-columns: 1fr; }
+}
+
+/* ---------- phones & small tablets
+   dvh = the screen height without the browser's address bar (100vh is too tall on phones). */
+.sidebar { height: 100dvh; }
+.chat { height: calc(100dvh - 200px); }
+.modal { max-height: calc(100dvh - 40px); }
+.cal-scroll { max-height: calc(100dvh - 250px); }
+
+@media (max-width: 860px) {
+  .chat { height: calc(100dvh - 170px); }
+  .owner-tabs button { padding: 12px 10px; }
+}
+
+@media screen and (max-width: 640px) {
+  /* phone tables: each row becomes a small card, every value labelled with its column (see responsiveTables.js) */
+  .table-wrap:has(> table.cards) { overflow-x: visible; }
+  table.t.cards, table.t.cards tbody, table.t.cards tr, table.t.cards td { display: block; }
+  table.t.cards thead { display: none; }
+  table.t.cards tr { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  table.t.cards tbody tr:last-child { border-bottom: 0; }
+  table.t.cards td { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 3px 0; border: 0; text-align: right; min-width: 0; overflow-wrap: anywhere; }
+  table.t.cards td::before { content: attr(data-label); flex: none; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--faint); text-align: left; }
+  table.t.cards td:first-child { justify-content: flex-start; text-align: left; padding-bottom: 6px; }
+  table.t.cards td:first-child::before, table.t.cards td[data-label=""]::before { display: none; }
+  table.t.cards td[data-label=""]:not(:first-child) { justify-content: flex-end; }
+  table.t.cards tbody tr.click:hover td { background: none; }
+  table.t.cards tbody tr.click:active { background: #f2f8f9; }
+
+  /* invoice lines (New invoice window): service + remove, then description, then qty | price | amount */
+  .modal { min-width: 0; }
+  .items-table thead { display: none; }
+  .items-table, .items-table tbody { display: block; }
+  .items-table tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .items-table td { padding: 0 !important; border: 0 !important; min-width: 0; }
+  .items-table td:nth-child(1) { grid-column: 1 / 4; }
+  .items-table td:nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
+  .items-table td:nth-child(6) { grid-column: 4; grid-row: 1; }
+  .items-table td:nth-child(5) { grid-column: 3 / -1; align-self: end; padding-bottom: 9px !important; }
+  .items-table td[data-label]::before { content: attr(data-label); display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--faint); margin-bottom: 3px; text-align: left; }
+  .table-wrap:has(> .items-table) { overflow-x: visible; }
+
+  /* 16px text in fields: smaller makes iPhones zoom in when you tap a field */
+  input, select, textarea { font-size: 16px; }
+  .code-input { font-size: 22px; }
+
+  /* pop-up windows slide up from the bottom and use the full width */
+  .modal-back { padding: 0; place-items: end stretch; }
+  .modal, .modal.wide { max-width: none; max-height: 92dvh; border-radius: 18px 18px 0 0; }
+  .modal-head, .modal-body { padding-left: 16px; padding-right: 16px; }
+  .modal-foot { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); border-radius: 0; flex-wrap: wrap; }
+  .toasts { left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); }
+  .toast { max-width: none; }
+
+  /* filter buttons (All / Unpaid / Paid…) become wrapping chips instead of a squeezed strip */
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; border: 0; background: none; overflow: visible; max-width: 100%; }
+  .seg button { height: 32px; padding: 0 12px; white-space: nowrap; border: 1px solid var(--border); border-radius: 99px; background: var(--surface); }
+  .seg button:last-child { border-right: 1px solid var(--border); }
+  .seg button.on { border-color: var(--primary-100); }
+
+  /* tabs wrap onto a second line instead of hiding off-screen */
+  .pill-tabs { flex-wrap: wrap; overflow: visible; gap: 6px; padding: 10px 12px; }
+  .pill-tabs button { padding: 6px 12px; margin: 0; border: 1px solid var(--border); border-radius: 99px; }
+  .pill-tabs button.on { background: var(--primary-50); border-color: var(--primary-100); }
+
+  /* tighter spacing so content gets the room */
+  .page-head { margin-bottom: 16px; }
+  .page-head > .row { width: 100%; }
+  .page-head > .row > .btn { flex: 1; }
+  .toolbar { padding: 12px; }
+  .toolbar .search { max-width: none; min-width: 0; flex-basis: 100%; }
+  .card-head { padding: 14px 16px; flex-wrap: wrap; }
+  .card-body { padding: 14px 16px; }
+  .appt { padding: 12px 16px; }
+  .note, .sec-row, .clinic-card { padding-left: 16px; padding-right: 16px; }
+  .log-row { padding: 10px 16px; }
+  .stats { gap: 12px; }
+  .stat { padding: 14px 16px; }
+  .profile-head { padding: 18px 16px; }
+  .chat-log { padding: 14px; }
+  .chat-input { padding: 12px; }
+  .doc-view-img { max-height: 50dvh; }
+  .qr-box img { width: 160px; height: 160px; }
+  .auth-panel { padding: 28px 16px 40px; }
+  .auth-hero h1 { font-size: 24px; }
+  .auth-hero p.lead { font-size: 14.5px; margin-bottom: 0; }
+  /* owner panel: email hidden in the top bar (shown on the Security page); tabs wrap as rounded buttons */
+  .owner-top { gap: 8px; }
+  .owner-top .owner-email { display: none; }
+  .owner-top .brand { font-size: 16px; min-width: 0; }
+  .owner-tabs { flex-wrap: wrap; overflow: visible; gap: 6px; padding: 10px 12px; }
+  .owner-tabs button { padding: 5px 11px; font-size: 13px; gap: 6px; margin: 0; border: 1px solid var(--border); border-radius: 99px; }
+  .owner-tabs button > .lucide { display: none; }
+  .owner-tabs button.on { background: var(--primary-50); border-color: var(--primary-100); }
+}
+
+@media (max-width: 520px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat .ico { display: none; }
+  .stat .val { font-size: 18px; }
 }
 
 /* ---------- print (invoices) */

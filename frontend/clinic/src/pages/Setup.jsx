@@ -28,7 +28,7 @@ export default function Setup() {
           <div className="card-head"><h2>Services &amp; fees</h2><span className="spacer" />
             <button className="btn sm" disabled={!canWrite} onClick={() => open((c) => <ServiceModal close={c} />)}><Plus /><span>Add</span></button></div>
           {refs.services.length ? (
-            <table className="t"><thead><tr><th>Service</th><th>Duration</th><th className="right">Price</th></tr></thead>
+            <table className="t no-cards"><thead><tr><th>Service</th><th>Duration</th><th className="right">Price</th></tr></thead>
               <tbody>{refs.services.map((s) => (
                 <tr key={s.id} className={canWrite ? 'click' : ''} onClick={() => canWrite && open((c) => <ServiceModal close={c} item={s} />)}>
                   <td><b>{s.name}</b> {!s.active && <Badge status="cancelled">Inactive</Badge>}<div className="small muted">{s.category || ''}</div></td>

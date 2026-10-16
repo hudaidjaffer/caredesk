@@ -58,9 +58,9 @@ export default function InvoiceModal({ close, inv = null, preset = {} }) {
             <tr key={i}>
               <td><select value={it.service_id || ''} onChange={(e) => setItem(i, 'service_id', e.target.value)}>{serviceOptions(refs.services, it.service_id, money)}</select></td>
               <td><input value={it.description} onChange={(e) => setItem(i, 'description', e.target.value)} placeholder="Treatment or item" /></td>
-              <td><input type="number" min="0" step="1" value={it.qty} onChange={(e) => setItem(i, 'qty', e.target.value)} /></td>
-              <td><input type="number" min="0" step="0.01" value={it.unit_price} onChange={(e) => setItem(i, 'unit_price', e.target.value)} placeholder="0.00" /></td>
-              <td className="right mono">{money(lineAmount(it))}</td>
+              <td data-label="Qty"><input type="number" min="0" step="1" value={it.qty} onChange={(e) => setItem(i, 'qty', e.target.value)} /></td>
+              <td data-label="Price"><input type="number" min="0" step="0.01" value={it.unit_price} onChange={(e) => setItem(i, 'unit_price', e.target.value)} placeholder="0.00" /></td>
+              <td className="right mono" data-label="Amount">{money(lineAmount(it))}</td>
               <td><button type="button" className="btn ghost icon sm" title="Remove" onClick={() => setItems((l) => (l.length > 1 ? l.filter((_, j) => j !== i) : [blank()]))}><X /></button></td>
             </tr>
           ))}</tbody>
