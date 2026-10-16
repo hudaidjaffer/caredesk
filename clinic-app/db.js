@@ -336,7 +336,7 @@ const DEFAULT_SETTINGS = {
   ai_hide_names: '1',
   ai_default_enabled: '1',
   ai_default_limit: '5',
-  signup_verify: '1',                          // new sign-ups must confirm their email (6-digit code or link)
+  signup_verify: '0',                          // '1' = new sign-ups must confirm their email (code or link); OFF (owner's choice)
   public_url: '',                              // website address used in email links, e.g. https://x.ngrok-free.app
   smtp_host: 'smtp.gmail.com',
   smtp_port: '465',

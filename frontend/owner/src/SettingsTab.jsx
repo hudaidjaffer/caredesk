@@ -37,7 +37,7 @@ export default function SettingsTab({ me, reload }) {
           </div>
         </div>
       </form>
-      <EmailCard me={me} reload={reload} />
+      {/* Sign-up email verification is switched off (owner's choice): render <EmailCard me={me} reload={reload} /> here to bring it back. */}
     </>
   );
 }

@@ -237,7 +237,11 @@ erpclaw-main/
 - Clinic sign-up seeds starter services by practice type (dental / therapy / physio / general / other) and the owner as a practitioner.
 - No email is sent right now (sign-up verification is on hold, §5a): forgotten passwords and lost 2FA phones are still handled by the owner in Manage.
 
-## 5a. Sign-up email: "real email" check + email verification (BOTH ON since 2026-10-16)
+## 5a. Sign-up email: "real email" check (ON) + email verification (OFF again since 2026-10-17)
+
+**2026-10-17: owner said "remove the 2 factor thing then"** (after learning Gmail sending needs Render Starter + an app
+password): `signup_verify` default back to `'0'`, EmailCard hidden again (one commented line in SettingsTab.jsx). Sign-up is
+instant again; the real-email check stays. Everything below (Gmail pre-fill, PUBLIC_URL, mailer) is kept, dormant.
 
 **2026-10-16: owner re-enabled verification** ("email caredesksupportt@gmail.com for 2 step verification and allow only legit
 addresses"). Defaults now: `signup_verify: '1'`, smtp_host smtp.gmail.com, port 465, user/from caredesksupportt@gmail.com
