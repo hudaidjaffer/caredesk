@@ -123,6 +123,16 @@ domain/DNS (Workers can't run this app). Render prep needed: CAREDESK_KEY env fr
   Storage). The PC copy still works (local mode) and is needed for: viewing/saving the encryption key, CLI commands
   (create-admin, reset-admin-2fa, restore-backup). Supabase secret key is NOT in the PC .env (photos/backups in Storage
   aren't reachable from the PC panel).
+- **Responsive (2026-10-16, owner asked "make both responsive"), live on both sites.** Phone rules are in
+  `shared/styles.css` "phones & small tablets" (`@media screen and (max-width: 640px)`): tables with a `<thead>` become
+  labelled cards via `shared/responsiveTables.js` (MutationObserver + queueMicrotask, NOT requestAnimationFrame, which never
+  fires in background tabs; opt out with `.no-cards`, used on InvoiceView items, Setup services, owner AiTab usage);
+  `.items-table` (New invoice) stacks per line using `data-label` on Qty/Price/Amount; modals = bottom sheets; `.seg`
+  filters, `.pill-tabs` and `.owner-tabs` wrap as chips; owner top bar hides the email (`.owner-email`); 16px inputs;
+  `dvh` heights. Appointments got a **Day** view (`c.view === 'day'`, prev/next ±1 day). Verified at 375/768/1280 with a
+  throwaway Supabase schema + seeded data (scratchpad `ui-lab.js`, `node ui-lab.js cleanup` drops it): every clinic
+  page, the main modals and all owner tabs have no overflow and no side-scrolling boxes. Browser-pane screenshots are
+  flaky when the pane is hidden; measure with JS instead.
 - Was next: Git was NOT installed (asked owner for permission to install via winget); owner creates GitHub account + empty
   private repo, Claude commits/pushes (owner signs in to GitHub in the browser popup); owner creates Render account
   (sign in with GitHub) → New → Blueprint → pastes the 3 secrets. After going live, the owner should run only the owner
