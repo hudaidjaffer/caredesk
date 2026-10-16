@@ -249,6 +249,10 @@ The online owner panel (free) can't send either, so its test button is hidden on
 before this, incl. hello@clinic.com (likely not the owner of that address). Tested: scratchpad `test-verify.js` 22/22.
 Still open: changing the email in clinic Settings is not code-verified (only the real-email check).
 
+**Never POST /api/auth/register (or any write) to the LIVE sites to check a deploy.** On 2026-10-16 a deploy check hit the
+old version and created a real clinic ("Deploy check"); the owner approved deleting it. Check deploys by bundle contents
+(curl the JS/CSS asset) or read-only GETs only.
+
 (Older notes below.)
 
 **Active now:** sign-up (and changing the clinic email in Settings) calls `checkRealEmail()` in `core.js`: strict format,
