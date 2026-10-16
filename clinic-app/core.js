@@ -6,7 +6,7 @@ const dns = require('node:dns').promises;
 const { db, now } = require('./db');
 const { sha256, clientIp } = require('./security');
 
-const TRIAL_DAYS = 7;
+const TRIAL_DAYS = 30;                          // free trial for new sign-ups (was 7 until 2026-10-17)
 const MIN_PASSWORD = 8;                         // no capital/number/symbol rules, just a minimum length
 const SECURE_COOKIES = process.env.SECURE_COOKIES === '1';   // set to 1 when served over HTTPS
 const DAY_MS = 86400000;

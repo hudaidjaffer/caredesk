@@ -13,7 +13,7 @@ Keep it updated when something important changes.
   (example data uses Pakistan: Rs currency, Lahore, Urdu OCR option). Prefers plain explanations,
   step-by-step "how to run it" instructions, and wants things done end-to-end and tested.
 - **Product:** **CareDesk** (placeholder name, changeable in the owner panel → Settings): a multi-clinic
-  practice-management web app. Clinics self-register with email + password and get a **7-day free trial with
+  practice-management web app. Clinics self-register with email + password and get a **30-day free trial with
   unlimited use**; after that **only the owner can activate** them.
 - The folder originally contained **ERPClaw** (`README.md`, `SKILL.md`, `scripts/`, `mcp/`, `bin/`, `assets/`, `UI.yaml`,
   `CHANGELOG.md`): a GPL-3 Python AI-chat accounting engine. **It is untouched and NOT used** by CareDesk.
@@ -226,7 +226,8 @@ erpclaw-main/
 
 ## 5. Business rules
 
-- Trial: `TRIAL_DAYS = 7`, min password `MIN_PASSWORD = 8` (top of `clinic-app/core.js`; was 4 until 2026-10-04,
+- Trial: `TRIAL_DAYS = 30` (owner raised it from 7 on 2026-10-17; the 4 clinics already on trial were also set to 30 days
+  from their sign-up date, logged as owner.clinic_extend_trial), min password `MIN_PASSWORD = 8` (top of `clinic-app/core.js`; was 4 until 2026-10-04,
   existing shorter passwords still sign in). Owner explicitly wanted **no** capital/number/symbol rules; don't add them.
 - Plans: `trial | active | suspended` (+ `prev_plan`). `accessFor(clinic, settings)` computes status
   `trial | active | expired | suspended`, `can_write`, `can_read`. Owner setting `expired_mode`:

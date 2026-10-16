@@ -40,7 +40,7 @@ export default function App() {
   const boot = useCallback(async () => {
     setError(null);
     try {
-      const p = await api('/api/public-settings').catch(() => ({ product_name: 'CareDesk', trial_days: 7 }));
+      const p = await api('/api/public-settings').catch(() => ({ product_name: 'CareDesk', trial_days: 30 }));
       setPub(p);
       document.title = `${p.product_name} · Clinic Management`;
       // opened from the "Confirm my email" link in the sign-up email

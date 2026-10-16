@@ -2,7 +2,7 @@
 
 CareDesk is clinic software for dentists, therapists, physiotherapists and small medical
 practices. Clinics sign up with a real email address and a password (at least 8 characters)
-and get a **7-day free trial with unlimited use**. After that, only
+and get a **30-day free trial with unlimited use**. After that, only
 **you** (the owner) can activate them.
 
 It is made of three folders:
@@ -213,7 +213,7 @@ Tip: choose a server in the same region as your Supabase project; every page loa
 | `OWNER_HOST` | 127.0.0.1 | Keep as is (owner panel: this computer only) |
 | `SECURE_COOKIES` | off | Set to `1` when served over HTTPS |
 
-Trial length (`TRIAL_DAYS = 7`) and minimum password length (`MIN_PASSWORD = 8`) are at the top of `clinic-app/core.js`.
+Trial length (`TRIAL_DAYS = 30`) and minimum password length (`MIN_PASSWORD = 8`) are at the top of `clinic-app/core.js`.
 
 ### Backups and restore
 - **Supabase** keeps its own daily backups of the database (see your project's Database → Backups; longer
