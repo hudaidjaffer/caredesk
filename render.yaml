@@ -20,6 +20,8 @@ services:
         value: all
       - key: SUPABASE_URL
         value: https://aqmzbhgrciqojbkrwcxo.supabase.co
+      - key: PUBLIC_URL            # website address used in the "Confirm my email" link
+        value: https://caredesk-t6nm.onrender.com
       - key: DATABASE_URL          # Supabase session pooler string, with the database password filled in
         sync: false
       - key: SUPABASE_SECRET_KEY   # sb_secret_... (photos/documents/backups go to Supabase Storage)

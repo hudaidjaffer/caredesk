@@ -237,7 +237,19 @@ erpclaw-main/
 - Clinic sign-up seeds starter services by practice type (dental / therapy / physio / general / other) and the owner as a practitioner.
 - No email is sent right now (sign-up verification is on hold, §5a): forgotten passwords and lost 2FA phones are still handled by the owner in Manage.
 
-## 5a. Sign-up email: "real email" check (active) + email verification (ON HOLD)
+## 5a. Sign-up email: "real email" check + email verification (BOTH ON since 2026-10-16)
+
+**2026-10-16: owner re-enabled verification** ("email caredesksupportt@gmail.com for 2 step verification and allow only legit
+addresses"). Defaults now: `signup_verify: '1'`, smtp_host smtp.gmail.com, port 465, user/from caredesksupportt@gmail.com
+(db.js DEFAULT_SETTINGS); the owner only pastes the Gmail **app password** in owner panel → Settings → Email card (rendered again).
+`emailReady()` now also needs the password when a username is set, so until it is saved sign-ups get 503 "paused" (fail-closed).
+Link base = setting `public_url` or env `PUBLIC_URL` (render.yaml: https://caredesk-t6nm.onrender.com). **Render free plan blocks
+SMTP (25/465/587)**: the clinic app must be on a paid instance (Starter) to send; `friendlyMailError` says so when `RENDER` is set.
+The online owner panel (free) can't send either, so its test button is hidden online (test = a real sign-up). 4 clinics signed up
+before this, incl. hello@clinic.com (likely not the owner of that address). Tested: scratchpad `test-verify.js` 22/22.
+Still open: changing the email in clinic Settings is not code-verified (only the real-email check).
+
+(Older notes below.)
 
 **Active now:** sign-up (and changing the clinic email in Settings) calls `checkRealEmail()` in `core.js`: strict format,
 rejects common typos with a "Did you mean …@gmail.com?" (`TYPOS`), throwaway/placeholder domains (`DISPOSABLE`,

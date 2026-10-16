@@ -336,13 +336,13 @@ const DEFAULT_SETTINGS = {
   ai_hide_names: '1',
   ai_default_enabled: '1',
   ai_default_limit: '5',
-  signup_verify: '0',                          // '1' = new sign-ups must confirm their email (code or link); on hold for now
+  signup_verify: '1',                          // new sign-ups must confirm their email (6-digit code or link)
   public_url: '',                              // website address used in email links, e.g. https://x.ngrok-free.app
-  smtp_host: '',
+  smtp_host: 'smtp.gmail.com',
   smtp_port: '465',
-  smtp_user: '',
+  smtp_user: 'caredesksupportt@gmail.com',
   smtp_pass: '',                               // encrypted
-  smtp_from: '',
+  smtp_from: 'caredesksupportt@gmail.com',
 };
 
 async function getSettings(runner = db) {

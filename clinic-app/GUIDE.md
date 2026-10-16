@@ -44,7 +44,7 @@ It is made of three folders:
 | Protection | What it means |
 |---|---|
 | **Encryption at rest** | Medical details, addresses, insurance, clinical notes, appointment notes, document text, uploaded photos and backups are encrypted (AES-256-GCM). Even someone who copies the database or photos can't read them without the key. |
-| **Real email at sign-up** | Sign-up only accepts a working email address: the address must be correctly written, common typos get a "Did you mean …@gmail.com?" hint, temporary/throwaway and example addresses are refused, and the app checks online that the email domain can actually receive mail. |
+| **Email confirmation at sign-up** | A 6-digit code (or link) is emailed; the account is created only after it is entered, so only people who own the address can sign up. Before that, sign-up also rejects: the address must be correctly written, common typos get a "Did you mean …@gmail.com?" hint, temporary/throwaway and example addresses are refused, and the app checks online that the email domain can actually receive mail. |
 | **Two-step sign-in (2FA)** | Optional for clinics, strongly recommended for you: password + 6-digit code from an authenticator app, with 10 one-time recovery codes. |
 | **Account lockout** | 5 wrong passwords lock the account for 15 minutes; plus a per-network limit against password guessing. |
 | **Activity log** | Who signed in, who viewed which patient record, every change, export, download and AI use. Kept 2 years; clinics see their own, you see all. |
@@ -115,11 +115,11 @@ node server.js create-admin your@email.com newpassword
 node server.js reset-admin-2fa your@email.com
 ```
 
-### 3.4 Email verification codes (ON HOLD: not switched on yet)
+### 3.4 Email verification codes (ON: only real email addresses can sign up)
 
-This is built but turned off for now; ask your developer to switch it back on. When it is on, new clinics must type
-a 6-digit code (or click a link) from an email before their account is created, and you set up the sending email like this.
-Easiest way, using a Gmail account (a new one just for the app is a good idea):
+New clinics must type a 6-digit code (or click "Confirm my email") from an email before their account is created.
+The codes are sent from **caredesksupportt@gmail.com**; its details are filled in already. Until its app password is saved,
+sign-ups are paused. **On Render the clinic app must be on a paid plan (Starter):** the free plan blocks sending email.
 
 1. Google Account → **Security** → turn on **2-Step Verification** → then search **App passwords** → create one
    (name it "CareDesk"). Google shows a 16-letter password: copy it.

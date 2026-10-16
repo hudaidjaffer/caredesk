@@ -37,7 +37,7 @@ export default function SettingsTab({ me, reload }) {
           </div>
         </div>
       </form>
-      {/* Sign-up email verification is on hold: render <EmailCard me={me} reload={reload} /> here to bring it back. */}
+      <EmailCard me={me} reload={reload} />
     </>
   );
 }
@@ -65,10 +65,10 @@ function EmailCard({ me, reload }) {
         {s.email_ready ? <Badge status="active">Ready</Badge> : <Badge status="expired">Not set up</Badge>}</div>
       <div className="card-body stack">
         <p className="small muted" style={{ margin: 0 }}>
-          New clinics get an email with a 6-digit code and a "Confirm my email" link. Their account is only created after they confirm.
-          Easiest setup: a Gmail account with an <b>App password</b> (Google Account → Security → 2-Step Verification → App passwords):
-          server <b>smtp.gmail.com</b>, port <b>465</b>, username = the Gmail address, password = the 16-letter app password.
-          Brevo, Zoho Mail or your web host's email also work.</p>
+          New clinics get an email with a 6-digit code and a "Confirm my email" link. Their account is only created after they confirm,
+          so only real, working email addresses can sign up. The Gmail details are filled in already: just paste the 16-letter
+          <b> App password</b> of that Gmail account (Google Account → Security → 2-Step Verification → App passwords) and save.</p>
+        {me.online && <p className="small" style={{ margin: 0 }}>Sending needs the <b>clinic app</b> service on a paid Render plan (Starter): Render's free plan blocks email.</p>}
         <label className="row" style={{ gap: 10 }}><input type="checkbox" checked={f.signup_verify} onChange={(e) => setF({ ...f, signup_verify: e.target.checked })} style={{ width: 'auto' }} />
           <span><b>Require email confirmation for new sign-ups</b> <span className="small muted">(recommended; if email is not set up, sign-ups are paused)</span></span></label>
         <div className="grid2">
@@ -78,17 +78,17 @@ function EmailCard({ me, reload }) {
           <Field label={s.smtp_pass_set ? 'Password (saved; type to replace)' : 'Password / app password'}>
             <input type="password" value={f.smtp_pass} onChange={set('smtp_pass')} autoComplete="new-password" placeholder={s.smtp_pass_set ? '••••••••' : ''} /></Field>
           <Field label="Send from (email address)"><input value={f.smtp_from} onChange={set('smtp_from')} placeholder="Same as username if empty" /></Field>
-          <Field label="Your website address (for the link in emails)"><input value={f.public_url} onChange={set('public_url')} placeholder="https://your-name.ngrok-free.app" /></Field>
+          <Field label="Your website address (for the link in emails)"><input value={f.public_url} onChange={set('public_url')} placeholder="Empty = the clinic site address" /></Field>
         </div>
         <div className="row wrap">
           <button className="btn primary" disabled={busy}>Save email settings</button>
-          <button type="button" className="btn" disabled={busy} onClick={async () => {
+          {!me.online && <button type="button" className="btn" disabled={busy} onClick={async () => {
             setBusy(true);
             try { await save(); const r = await api('/api/admin/email/test', { method: 'POST', body: {} }); toast(`Test email sent to ${r.to}. Check the inbox (and spam).`); } catch (err) { toast(err.message, true); }
             setBusy(false);
-          }}><Send /><span>{busy ? 'Sending…' : 'Save & send test email to me'}</span></button>
+          }}><Send /><span>{busy ? 'Sending…' : 'Save & send test email to me'}</span></button>}
         </div>
-        {!f.public_url && <p className="small muted" style={{ margin: 0 }}>Without a website address, the email contains only the code (no link).</p>}
+        {me.online && <p className="small muted" style={{ margin: 0 }}>To test: open your clinic site, sign up with another email address of yours, and check that the code arrives (also in spam).</p>}
       </div>
     </form>
   );

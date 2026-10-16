@@ -16,7 +16,8 @@ function mailConfig(s) {
   };
 }
 
-const emailReady = (s) => { const c = mailConfig(s); return !!(c.host && c.from); };
+// ready = server and sender known, and (when a username is used) its password has been saved
+const emailReady = (s) => { const c = mailConfig(s); return !!(c.host && c.from && (!c.user || c.pass)); };
 
 function transport(c) {
   const local = ['localhost', '127.0.0.1', '::1'].includes(c.host);
@@ -34,7 +35,11 @@ function friendlyMailError(err) {
   const m = String(err && err.message);
   if (/Invalid login|auth|535|534/i.test(m)) return 'The email server rejected the username or password. (Gmail needs an "App password", not your normal password.)';
   if (/ENOTFOUND|getaddrinfo/i.test(m)) return 'Cannot find the email server. Check the "SMTP server" address.';
-  if (/ECONNREFUSED|ETIMEDOUT|timeout|ECONNRESET/i.test(m)) return 'Cannot connect to the email server. Check the server address and port (usually 465 or 587).';
+  if (/ECONNREFUSED|ETIMEDOUT|timeout|ECONNRESET|ENETUNREACH|EHOSTUNREACH/i.test(m)) {
+    // Render's free plan blocks outbound email (ports 25/465/587); any paid instance type allows it
+    if (process.env.RENDER) return 'Email could not be sent: this server is on Render\'s free plan, which blocks sending email. Upgrade the service to a paid instance type (Starter).';
+    return 'Cannot connect to the email server. Check the server address and port (usually 465 or 587).';
+  }
   return `Email could not be sent (${m.slice(0, 200)}).`;
 }
 
