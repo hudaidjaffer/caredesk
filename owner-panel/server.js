@@ -346,6 +346,7 @@ async function handle(req, res) {
   try { url = new URL(req.url, 'http://localhost'); } catch { return send(res, 400, { error: 'Bad request' }); }
   try {
     if (url.pathname.startsWith('/api/')) await handleApi(req, res, url);
+    else if (url.pathname === '/robots.txt') send(res, 200, 'User-agent: *\nDisallow: /\n', { 'Content-Type': 'text/plain; charset=utf-8' });   // never in search results
     else if (req.method === 'GET' || req.method === 'HEAD') serveStatic(req, res, url.pathname);
     else send(res, 405, { error: 'Method not allowed' });
   } catch (err) {

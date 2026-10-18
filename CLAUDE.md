@@ -254,6 +254,18 @@ The online owner panel (free) can't send either, so its test button is hidden on
 before this, incl. hello@clinic.com (likely not the owner of that address). Tested: scratchpad `test-verify.js` 22/22.
 Still open: changing the email in clinic Settings is not code-verified (only the real-email check).
 
+**SEO website (2026-10-18, owner asked to "work for SEO"):** `clinic-app/site.js` serves server-rendered marketing pages
+(no JS needed): `/`, `/dental-clinic-software`, `/physiotherapy-clinic-software`, `/therapy-practice-software`,
+`/clinic-management-software-pakistan` (content = only real features; AI not advertised because no OpenRouter key yet), plus
+`/robots.txt` (disallows /api/ and /app), `/sitemap.xml` (bump `UPDATED` when copy changes), `/site.js` (forwards old
+`/#/…` links to `/app#/…`) and a real 404 (noindex). Titles ≤70, descriptions ≤160, one H1, canonical = `PUBLIC_URL` + path,
+JSON-LD (Organization, WebSite, SoftwareApplication, WebPage, BreadcrumbList, FAQPage; **no ratings/reviews**), OG tags,
+optional `GOOGLE_SITE_VERIFICATION` env → meta tag. **The clinic SPA moved to `/app`** (`staticServer(dist, { spa: false,
+appPaths: ['/app','/app/'] })`; app index.html has `noindex`; signed-in clinic on `/` → 302 /app; "Sign in" → `/app#signin`
+opens the login tab; verify-email link is `/app#/verify-email/…`). Owner panel serves `robots.txt: Disallow: /`.
+Tested: scratchpad `test-seo.js` 63/63 + phone/desktop browser checks. Not done (needs the owner): Search Console
+verification + sitemap submission, custom domain (then change PUBLIC_URL in render.yaml), OG image, privacy/terms pages.
+
 **Never POST /api/auth/register (or any write) to the LIVE sites to check a deploy.** On 2026-10-16 a deploy check hit the
 old version and created a real clinic ("Deploy check"); the owner approved deleting it. Check deploys by bundle contents
 (curl the JS/CSS asset) or read-only GETs only.

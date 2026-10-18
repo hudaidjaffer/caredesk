@@ -22,7 +22,9 @@ const {
 const { audit } = sec;
 
 const PORT = Number(process.env.PORT) || 3000;
-const serveStatic = staticServer(path.join(__dirname, 'dist'));
+// The public website (site.js) owns "/" and the topic pages; the clinic app itself opens at /app.
+const serveStatic = staticServer(path.join(__dirname, 'dist'), { spa: false, appPaths: ['/app', '/app/'] });
+const site = require('./site');
 const RAW_UPLOAD = [/^\/api\/patients\/[\w-]+\/documents$/, /^\/api\/import\/patients\/preview$/];
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -98,7 +100,7 @@ async function startSignupVerification(req, email, details, settings, existing) 
   // The link uses the website address set by the owner (never the request's Host header, which a sender can fake).
   // The token sits after "#", so it is never sent to the server or to ngrok's logs when the link is opened.
   const base = String(settings.public_url || process.env.PUBLIC_URL || '').replace(/\/+$/, '');
-  const link = base ? `${base}/#/verify-email/${token}` : null;
+  const link = base ? `${base}/app#/verify-email/${token}` : null;
   try {
     await mailer.sendSignupCode(email, code, link, settings);
   } catch (err) {
@@ -456,7 +458,8 @@ const server = http.createServer(async (req, res) => {
         if (w) await audit(req, { clinicId: ctx.clinicId, actorId: ctx.clinicId, ...w });
       }
     } else if (req.method === 'GET' || req.method === 'HEAD') {
-      serveStatic(req, res, url.pathname);
+      if (await site.handleSite(req, res, url)) return;
+      if (!serveStatic(req, res, url.pathname)) await site.notFound(req, res);
     } else {
       send(res, 405, { error: 'Method not allowed' });
     }

@@ -322,21 +322,27 @@ const MIME = {
   '.woff2': 'font/woff2', '.webmanifest': 'application/manifest+json',
 };
 
-// Serves a built single-page app; unknown paths fall back to index.html.
-function staticServer(dir) {
+// Serves a built single-page app. spa: unknown paths fall back to index.html (owner panel).
+// With spa off (clinic app: the public website owns "/"), only appPaths open the app and the
+// function returns false for anything it doesn't have, so the caller can answer with a real 404.
+function staticServer(dir, { spa = true, appPaths = [] } = {}) {
   return function serveStatic(req, res, pathname) {
     let rel;
-    try { rel = pathname === '/' ? '/index.html' : decodeURIComponent(pathname); } catch { return send(res, 400, 'Bad path'); }
+    try {
+      rel = (spa && pathname === '/') || appPaths.includes(pathname) ? '/index.html' : decodeURIComponent(pathname);
+    } catch { return send(res, 400, 'Bad path'); }
     const file = path.normalize(path.join(dir, rel));
     if (!file.startsWith(dir + path.sep)) return send(res, 403, { error: 'Forbidden' });
     if (fs.existsSync(file) && fs.statSync(file).isFile()) {
       // hashed build assets can be cached forever; html must always be fresh
       const immutable = /[\\/]assets[\\/]/.test(file);
-      return send(res, 200, fs.readFileSync(file), {
+      send(res, 200, fs.readFileSync(file), {
         'Content-Type': MIME[path.extname(file)] || 'application/octet-stream',
         'Cache-Control': immutable ? 'public, max-age=31536000, immutable' : 'no-cache',
       });
+      return true;
     }
+    if (!spa) return false;
     const index = path.join(dir, 'index.html');
     if (fs.existsSync(index)) return send(res, 200, fs.readFileSync(index), { 'Content-Type': MIME['.html'], 'Cache-Control': 'no-cache' });
     send(res, 503, 'The app has not been built yet. Run "npm run build" in the frontend folder.', { 'Content-Type': 'text/plain' });

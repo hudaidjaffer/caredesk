@@ -88,7 +88,7 @@ async function logout() {
 
 function Auth({ pub, onSignedIn, linkError }) {
   const toast = useToast();
-  const [mode, setMode] = useState(linkError ? 'login' : 'register');
+  const [mode, setMode] = useState(linkError || window.location.hash === '#signin' ? 'login' : 'register');
   const [f, setF] = useState({ clinic_type: 'dental' });
   const [error, setError] = useState(linkError || '');
   const [busy, setBusy] = useState(false);

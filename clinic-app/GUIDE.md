@@ -227,6 +227,30 @@ Trial length (`TRIAL_DAYS = 30`) and minimum password length (`MIN_PASSWORD = 8`
   ```
 
 ---
+## 6a. Your public website and Google (SEO)
+
+The clinic site's address now shows a public website that search engines can read; the clinic app itself is at **/app**
+(the website's "Sign in" and "Start free trial" buttons lead there; signed-in clinics are sent straight to it).
+
+| Page | Aimed at searches like |
+|---|---|
+| `/` | clinic management software, clinic software |
+| `/dental-clinic-software` | dental clinic software, dental practice management |
+| `/physiotherapy-clinic-software` | physiotherapy clinic software, physio practice software |
+| `/therapy-practice-software` | therapy / counselling practice software |
+| `/clinic-management-software-pakistan` | clinic software Pakistan, Lahore, Karachi, Islamabad |
+
+Also: `/robots.txt`, `/sitemap.xml`, titles and descriptions for Google, structured data, and a real "not found" page.
+The product name and support contact on the pages come from owner panel → Settings.
+
+**To get listed faster (Google Search Console, free):** go to search.google.com/search-console, add the property
+`https://caredesk-t6nm.onrender.com/` (URL prefix), choose **HTML tag**, and copy only the code inside `content="…"`.
+Give that code to your developer (it is not secret): it goes into the `GOOGLE_SITE_VERIFICATION` setting. Then click
+Verify, open **Sitemaps** and submit `sitemap.xml`. Google usually starts showing new sites within days to a few weeks.
+
+**What helps most from here:** your own domain name (e.g. caredesk.pk), the Starter plan (Google ranks slow sites lower
+and the free plan takes ~30 s to wake up), a Google Business Profile, and links from directories, social pages and clinics.
+
 ## 7. Daily workflow (to teach your clinics)
 
 1. **Setup once**: Settings → clinic profile (address, currency, tax, invoice footer); Services & team → fees and staff colours;
