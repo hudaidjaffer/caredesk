@@ -266,6 +266,14 @@ opens the login tab; verify-email link is `/app#/verify-email/…`). Owner panel
 Tested: scratchpad `test-seo.js` 63/63 + phone/desktop browser checks. Not done (needs the owner): Search Console
 verification + sitemap submission, custom domain (then change PUBLIC_URL in render.yaml), OG image, privacy/terms pages.
 
+**Outage 2026-10-27:** Supabase Free **paused the project** after ~a week without DB activity (Render free sleeps, so nothing
+queried it); both servers exited at start-up and both sites hung. Owner clicked Restore in Supabase. Fixes: both servers now
+`listen` first and call `db.connectUntilReady(check)` (retries forever, 10–60 s; sets `db.state.ready`); while not ready the APIs
+return 503 "starting up" and the website (site.js `siteSettings()`: 60 s cache, DEFAULT_SETTINGS fallback) still works;
+Render healthCheckPath is now `/` for both services. **Keep-awake:** `.github/workflows/keepalive.yml` (GitHub Actions, daily
+03:23 UTC) curls /api/public-settings with retries; .gitignore now ignores only the ERPClaw `.github/workflows/test.yml`.
+Tested: scratchpad test-dbdown.js 12/12 (DB unreachable), test-full.js 17/17 (normal use, throwaway schema).
+
 **Never POST /api/auth/register (or any write) to the LIVE sites to check a deploy.** On 2026-10-16 a deploy check hit the
 old version and created a real clinic ("Deploy check"); the owner approved deleting it. Check deploys by bundle contents
 (curl the JS/CSS asset) or read-only GETs only.
