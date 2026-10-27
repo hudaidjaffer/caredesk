@@ -69,6 +69,7 @@ async function handleApi(req, res, url) {
   const p = url.pathname;
   const m = req.method;
   const q = url.searchParams;
+  if (!need('db').state.ready) throw new HttpError(503, 'The owner panel is starting up (connecting to the database). Please try again in a minute.');
   limit(`owner:${sec.clientIp(req)}`, 600, 60000);
   if (m !== 'GET') {
     checkSameOrigin(req);
@@ -400,21 +401,16 @@ async function cli() {
 if (cmd) {
   cli().then(() => close()).then(() => process.exit(0), (e) => { console.error(e.message); process.exit(1); });
 } else {
-  (async () => {
-    try {
-      await need('db').initWithRetry();
-      await sec.verifyKey();
-    } catch (err) {
-      console.error(`\n  Could not start: ${err.message}\n`);
-      process.exit(1);
-    }
-    listenLoopbackV6();
-    server.listen(PORT, HOST, async () => {
-      console.log(`\n  ${(await getSettings()).product_name} OWNER PANEL is running`);
-      console.log(`  Open: http://localhost:${PORT}`);
-      console.log(`  Database: Supabase / PostgreSQL (schema "${SCHEMA}") · Files: ${storage.describe()}`);
-      if (!(await adminCount())) console.log('  First time? The page will ask you to create your owner account.');
-      console.log('');
-    });
-  })();
+  // Answer straight away, then connect to the database in the background (retrying until it works);
+  // until then the API replies "starting up" instead of the page hanging.
+  listenLoopbackV6();
+  server.listen(PORT, HOST, () => {
+    console.log(`\n  OWNER PANEL is running: http://localhost:${PORT}`);
+    console.log(`  Database: Supabase / PostgreSQL (schema "${SCHEMA}") · Files: ${storage.describe()}\n`);
+  });
+  need('db').connectUntilReady(() => sec.verifyKey()).then(async () => {
+    console.log(`  Connected to the database. ${(await getSettings()).product_name} owner panel is ready.`);
+    if (!(await adminCount())) console.log('  First time? The page will ask you to create your owner account.');
+    console.log('');
+  });
 }

@@ -301,6 +301,22 @@ function init() {
   return ready;
 }
 
+// Set to true once the database is connected and checked. While false the servers still answer
+// (website pages, "starting up" messages) instead of hanging or crashing, e.g. when Supabase has paused the project.
+const state = { ready: false };
+
+// Keeps trying to connect (10 s, 20 s, … up to 60 s apart) until `check` succeeds; never gives up.
+async function connectUntilReady(check, label = 'Database') {
+  for (let i = 1; ; i++) {
+    try { await init(); await check(); state.ready = true; return; } catch (err) {
+      const wait = Math.min(60, 10 * i);
+      console.error(`  ${label} not available: ${String(err.message).split('\n')[0]} (trying again in ${wait} s)`);
+      if (i === 1 && /tenant|not found|ENOTFOUND/i.test(String(err.message))) console.error('  Tip: if the Supabase project is paused, open supabase.com and click "Restore project".');
+      await new Promise((r) => setTimeout(r, wait * 1000));
+    }
+  }
+}
+
 // Start-up: if Supabase is briefly unreachable (network blip, Supabase incident), keep trying for about a minute
 // instead of closing the window straight away. A wrong password is reported immediately.
 async function initWithRetry(tries = 7) {
@@ -358,5 +374,5 @@ async function setSetting(key, value, runner = db) {
 const close = () => pool.end();
 
 module.exports = {
-  db, tx, init, initWithRetry, close, now, getSettings, setSetting, DEFAULT_SETTINGS, DATA_DIR, UPLOAD_DIR, BACKUP_DIR, SCHEMA, TABLES, pool,
+  db, tx, init, initWithRetry, connectUntilReady, state, close, now, getSettings, setSetting, DEFAULT_SETTINGS, DATA_DIR, UPLOAD_DIR, BACKUP_DIR, SCHEMA, TABLES, pool,
 };

@@ -15,7 +15,8 @@ node_modules/
 dist/
 
 # ---- the old ERPClaw project that shares this folder (not part of CareDesk)
-.github/
+# (.github/workflows/keepalive.yml belongs to CareDesk and IS uploaded)
+.github/workflows/test.yml
 assets/
 bin/
 mcp/

@@ -1,0 +1,27 @@
+# Keeps CareDesk awake: Supabase's free plan pauses a project after about a week without database activity,
+# which takes the whole app offline. Once a day this opens a page that reads from the database.
+# Runs on GitHub's servers (free). Started by hand from the repository's Actions tab with "Run workflow".
+name: Keep CareDesk awake
+
+on:
+  schedule:
+    - cron: '23 3 * * *'        # every day at 03:23 UTC (08:23 in Pakistan)
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Visit the clinic app (wakes Render, which then queries Supabase)
+        run: |
+          for i in 1 2 3 4 5 6; do
+            code=$(curl -s -o /tmp/out.json -w '%{http_code}' --max-time 120 https://caredesk-t6nm.onrender.com/api/public-settings || true)
+            echo "attempt $i: HTTP $code"
+            if [ "$code" = "200" ]; then cat /tmp/out.json; echo; exit 0; fi
+            sleep 60
+          done
+          echo "::error::The clinic app did not answer with 200. If Supabase paused the project, open supabase.com and click Restore."
+          exit 1

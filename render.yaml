@@ -9,7 +9,7 @@ services:
     plan: free                     # change to "starter" (or in the dashboard) so the app never sleeps
     buildCommand: cd frontend && npm ci --include=dev && npm run build:clinic && cd ../clinic-app && npm ci --omit=dev
     startCommand: cd clinic-app && node server.js
-    healthCheckPath: /api/public-settings
+    healthCheckPath: /              # the website answers even while the database reconnects
     autoDeploy: true
     envVars:
       - key: NODE_VERSION
@@ -39,7 +39,7 @@ services:
     plan: free
     buildCommand: cd frontend && npm ci --include=dev && npm run build:owner && cd ../clinic-app && npm ci --omit=dev
     startCommand: cd owner-panel && node server.js
-    healthCheckPath: /api/admin/status
+    healthCheckPath: /              # the page answers even while the database reconnects
     autoDeploy: true
     envVars:
       - key: NODE_VERSION

@@ -1,11 +1,22 @@
 // Public website (SEO): plain, fast HTML pages that search engines can read, plus robots.txt, sitemap.xml and a
 // real 404 page. The clinic app itself lives at /app. Product name and support contact come from the owner's
 // settings, so renaming the product updates every page. Content describes only features that really exist.
-const { getSettings } = require('./db');
+const { getSettings, DEFAULT_SETTINGS, state } = require('./db');
 const { getSession } = require('./core');
 
 const UPDATED = '2026-10-18';                     // "last changed" date in sitemap.xml; bump when page text changes
 const TRIAL = () => require('./core').TRIAL_DAYS;
+
+// Website settings (product name, contact): cached for a minute; defaults while the database is not connected,
+// so the public pages never wait for, or fail because of, the database.
+let cached = null;
+let cachedAt = 0;
+async function siteSettings() {
+  if (!state.ready) return cached || DEFAULT_SETTINGS;
+  if (cached && Date.now() - cachedAt < 60000) return cached;
+  try { cached = await getSettings(); cachedAt = Date.now(); } catch { /* keep the last good copy */ }
+  return cached || DEFAULT_SETTINGS;
+}
 
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -306,13 +317,15 @@ async function handleSite(req, res, url) {
   if (!PAGES[p]) return false;
   if (url.pathname !== p) return out(301, '', { Location: p + url.search });          // one address per page (no trailing slash)
   // a signed-in clinic going to the home page goes straight to its app
-  if (p === '/' && await getSession(req, 'clinic').catch(() => null)) return out(302, '', { Location: '/app', 'Cache-Control': 'no-store' });
-  const s = await getSettings();
+  if (p === '/' && state.ready && /cd_session=/.test(req.headers.cookie || '') && await getSession(req, 'clinic').catch(() => null)) {
+    return out(302, '', { Location: '/app', 'Cache-Control': 'no-store' });
+  }
+  const s = await siteSettings();
   return out(200, renderPage(req, s, p), headers('text/html; charset=utf-8', 'public, max-age=300'));
 }
 
 async function notFound(req, res) {
-  const s = await getSettings().catch(() => ({}));
+  const s = await siteSettings();
   res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
   res.end(req.method === 'HEAD' ? undefined : notFoundPage(req, s));
 }

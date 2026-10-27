@@ -120,6 +120,9 @@ async function handleApi(req, res, url, ctx) {
   const m = req.method;
   const q = url.searchParams;
 
+  if (!require('./db').state.ready) {
+    throw new HttpError(503, 'The service is starting up. Please try again in a minute.');
+  }
   limit(`api:${sec.clientIp(req)}`, 900, 60000);
   if (m !== 'GET') checkSameOrigin(req);
   // Writes must be JSON (forms from other sites can't send that); file uploads use a custom header instead.
@@ -474,25 +477,18 @@ const server = http.createServer(async (req, res) => {
 server.headersTimeout = 60000;
 server.requestTimeout = 180000;   // AI answers can take a while
 
-(async () => {
-  try {
-    await require('./db').initWithRetry();
-    await sec.verifyKey();
-    await storage.ensureBucket();
-  } catch (err) {
-    console.error(`\n  Could not start: ${err.message}\n`);
-    process.exit(1);
-  }
-  await purgeExpiredSessions();
-  await purgeOldSignups();
-  await sec.purgeOldAudit();
+// Answer straight away (the public website works without the database), then connect to the database in the
+// background and keep retrying until it works. Until then the API replies "starting up" instead of hanging.
+server.listen(PORT, () => {
+  console.log(`\n  Clinic app is running: http://localhost:${PORT}`);
+  console.log(`  Database: Supabase / PostgreSQL (schema "${require('./db').SCHEMA}") · Files: ${storage.describe()}`);
+  console.log('  (The owner panel is separate: run start.bat in the owner-panel folder.)\n');
+});
+require('./db').connectUntilReady(async () => { await sec.verifyKey(); await storage.ensureBucket(); }).then(async () => {
+  console.log(`  Connected to the database. ${(await getSettings()).product_name} is ready.\n`);
+  await purgeExpiredSessions().catch(() => {});
+  await purgeOldSignups().catch(() => {});
+  await sec.purgeOldAudit().catch(() => {});
   setInterval(() => { purgeExpiredSessions().catch(() => {}); purgeOldSignups().catch(() => {}); }, 3600000).unref();
   scheduleBackups();
-  server.listen(PORT, async () => {
-    console.log(`\n  ${(await getSettings()).product_name} clinic app is running`);
-    console.log(`  Open: http://localhost:${PORT}`);
-    console.log(`  Database: Supabase / PostgreSQL (schema "${require('./db').SCHEMA}")`);
-    console.log(`  Files: ${storage.describe()}`);
-    console.log('  (The owner panel is separate: run start.bat in the owner-panel folder.)\n');
-  });
-})();
+});
